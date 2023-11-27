@@ -103,7 +103,9 @@ create models
 
 sign up form...
 
-
+add isAdmin to model
+create a user called admin
+continue with step 5...
 
 
 
