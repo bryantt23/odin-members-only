@@ -7,4 +7,4 @@ const SecretSchema = new Schema({
 });
 
 // Export model
-module.exports = mongoose.model('Secret', SecretSchema);
+module.exports = SecretSchema;
