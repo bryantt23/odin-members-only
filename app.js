@@ -1,10 +1,13 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
+const session = require('express-session');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const { body, validationResult } = require('express-validator');
-const mongoose = require('mongoose');
 require('dotenv').config();
 
 const bcrypt = require('bcryptjs');
@@ -16,6 +19,37 @@ const mongoDb = process.env.MONGODB_URI;
 mongoose.connect(mongoDb);
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'mongo connection error'));
+
+passport.use(
+  new LocalStrategy(async (username, password, done) => {
+    try {
+      const user = await User.findOne({ username: username });
+      if (!user) {
+        return done(null, false, { message: 'Incorrect username' });
+      }
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) {
+        return done(null, false, { message: 'Incorrect password' });
+      }
+      return done(null, user);
+    } catch (err) {
+      return done(err);
+    }
+  })
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
 
 const app = express();
 
@@ -29,7 +63,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+app.get('/', (req, res) => {
+  res.render('index', { user: req.user });
+});
+
 app.use('/users', usersRouter);
 
 // error handler
@@ -76,6 +113,14 @@ app.post(
       return next(err);
     }
   }
+);
+
+app.post(
+  '/log-in',
+  passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/'
+  })
 );
 
 // catch 404 and forward to error handler
