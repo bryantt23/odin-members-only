@@ -60,7 +60,7 @@ app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -135,9 +135,6 @@ app.post(
 
 app.get('/log-out', (req, res, next) => {
   req.logout(err => {
-    if (err) {
-      return next(err);
-    }
     res.redirect('/');
   });
 });
@@ -172,6 +169,28 @@ app.post('/add-secret', async (req, res, next) => {
 
     // Save the updated user
     await req.user.save();
+
+    res.redirect('/');
+  } catch (err) {
+    return next(err);
+  }
+});
+app.post('/delete-secret', async (req, res, next) => {
+  const secretToDelete = req.body.secretId; // Change to req.body.secretId
+
+  try {
+    // Assuming Secret is your secret model
+    // Delete the secret from the Secret collection
+    await Secret.findByIdAndDelete(secretToDelete);
+
+    // Update all users to remove the deleted secret
+    const users = await User.find({ secrets: secretToDelete });
+    for (const user of users) {
+      user.secrets = user.secrets.filter(
+        secret => secret.toString() !== secretToDelete
+      );
+      await user.save();
+    }
 
     res.redirect('/');
   } catch (err) {

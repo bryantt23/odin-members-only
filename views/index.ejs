@@ -26,11 +26,22 @@
       <tr>
         <th>Superhero</th>
         <th>Secret Identity</th>
+        <th>Actions</th>
+        <!-- Added column for actions -->
       </tr>
       <% secrets.forEach(function(secret) { %>
       <tr>
         <td><%= secret.superhero %></td>
         <td><%= user ? secret.secretIdentity : '***' %></td>
+        <td>
+          <% if (user && user.isAdmin) { %>
+          <form action="/delete-secret" method="POST">
+            <input type="hidden" name="secretId" value="<%= secret._id %>" />
+            <button type="submit">Delete Secret</button>
+          </form>
+
+          <% } %>
+        </td>
       </tr>
       <% }) %>
     </table>
