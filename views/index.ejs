@@ -7,12 +7,12 @@
   <body>
     <h1>Superhero Secret Identities</h1>
 
-    <% if (user) {%>
+    <% if (user) { %>
     <h1>WELCOME BACK <%= user.name %></h1>
     <p>Add a secret identity <a href="/add-secret">here</a></p>
     <a href="/log-out">LOG OUT</a>
     <% } else { %>
-    <h1>please log in or <a href="/sign-up">Sign up</a></h1>
+    <h1>Please log in or <a href="/sign-up">Sign up</a></h1>
     <form action="/log-in" method="POST">
       <label for="username">Username</label>
       <input name="username" placeholder="username" type="text" />
@@ -20,6 +20,19 @@
       <input name="password" type="password" />
       <button>Log In</button>
     </form>
-    <%}%>
+    <% } %>
+
+    <table>
+      <tr>
+        <th>Superhero</th>
+        <th>Secret Identity</th>
+      </tr>
+      <% secrets.forEach(function(secret) { %>
+      <tr>
+        <td><%= secret.superhero %></td>
+        <td><%= user ? secret.secretIdentity : '***' %></td>
+      </tr>
+      <% }) %>
+    </table>
   </body>
 </html>

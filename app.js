@@ -68,8 +68,13 @@ app.use(session({ secret: 'cats', resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/', (req, res) => {
-  res.render('index', { user: req.user });
+app.get('/', async (req, res) => {
+  const users = await User.find({}).populate('secrets');
+  const secrets = users.reduce((acc, user) => {
+    return acc.concat(user.secrets);
+  }, []);
+
+  res.render('index', { user: req.user, secrets });
 });
 
 app.use('/users', usersRouter);
