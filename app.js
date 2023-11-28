@@ -133,6 +133,15 @@ app.post(
   })
 );
 
+app.get('/log-out', (req, res, next) => {
+  req.logout(err => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect('/');
+  });
+});
+
 app.get('/add-secret', (req, res) => res.render('add-secret'));
 app.post('/add-secret', async (req, res, next) => {
   const errors = validationResult(req);
