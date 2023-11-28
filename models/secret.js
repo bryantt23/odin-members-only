@@ -6,5 +6,6 @@ const SecretSchema = new Schema({
   secretIdentity: { type: String, required: true }
 });
 
-// Export model
-module.exports = SecretSchema;
+// Convert the schema into a model and export it
+const Secret = mongoose.model('Secret', SecretSchema);
+module.exports = Secret;

@@ -14,6 +14,7 @@ const bcrypt = require('bcryptjs');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const User = require('./models/user');
+const Secret = require('./models/secret');
 
 const mongoDb = process.env.MONGODB_URI;
 mongoose.connect(mongoDb);
@@ -126,6 +127,43 @@ app.post(
     failureRedirect: '/'
   })
 );
+
+app.get('/add-secret', (req, res) => res.render('add-secret'));
+app.post('/add-secret', async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+  }
+
+  if (!req.user) {
+    return res.status(401).send('User not authenticated');
+  }
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    // Create a new secret document
+    const newSecret = new Secret({
+      superhero: req.body.superhero,
+      secretIdentity: req.body.secretIdentity
+    });
+
+    // Save the new secret
+    const savedSecret = await newSecret.save();
+
+    // Add the secret's ObjectId to the user's secrets array
+    req.user.secrets.push(savedSecret._id);
+
+    // Save the updated user
+    await req.user.save();
+
+    res.redirect('/');
+  } catch (err) {
+    return next(err);
+  }
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -9,6 +9,7 @@
 
     <% if (user) {%>
     <h1>WELCOME BACK <%= user.name %></h1>
+    <p>Add a secret identity <a href="/add-secret">here</a></p>
     <a href="/log-out">LOG OUT</a>
     <% } else { %>
     <h1>please log in or <a href="/sign-up">Sign up</a></h1>
